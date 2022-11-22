@@ -1,0 +1,15 @@
+# 파일 명세 버전
+version: '3'
+services:
+  app:
+    container_name: rm-mart
+    build: .
+    ports:
+      - '8080:3000'
+    links:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - '27017:27017'
