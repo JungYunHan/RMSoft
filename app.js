@@ -1,87 +1,44 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const app = express();
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 
-app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({ extended: false }));
+var indexRouter = require('./routes/index');
+const itemInfoRouter = require('./routes/itemInfo');
+const connect = require('./schemas');
 
-// MongoDB 연결
-mongoose
-  .connect('mongodb://mongo:27017/rm-mart', { useNewUrlParser: true })
-  .then(() => console.log('MongoDB Connected'))
-  .catch((err) => console.log(err));
+var app = express();
 
-const ItemInfo = require('./models/itemInfo');
-const RegisterCompany = require('./models/registerCompany');
-const Buyer = require('./models/buyer');
-const PurchaseInfo = require('./models/purchaseInfo');
+connect();
 
-app.get('/item', (req, res) => {
-  ItemInfo.find()
-    .then((items) => res.render('index', { items }))
-    .catch((err) => res.status(404).json({ msg: '등록된 상품이 없습니다.' }));
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', indexRouter);
+app.use('/item', itemInfoRouter);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  next(createError(404));
 });
 
-app.get('/company', (req, res) => {
-  RegisterCompany.find()
-    .then((company) => res.render('index', { items }))
-    .catch((err) => res.status(404).json({ msg: '등록된 업체가 없습니다.' }));
+// error handler
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
 });
 
-app.get('/buyer', (req, res) => {
-  Buyer.find()
-    .then((buyer) => res.render('index', { items }))
-    .catch((err) => res.status(404).json({ msg: '구매자가 없습니다.' }));
-});
-
-app.get('/purchase', (req, res) => {
-  PurchaseInfo.find()
-    .then((purchase) => res.render('index', { items }))
-    .catch((err) => res.status(404).json({ msg: '구매 정보가 없습니다.' }));
-});
-
-app.post('/item/add', (req, res) => {
-  const newItem = new ItemInfo({
-    itemName: req.body.itemName,
-    price: req.body.price,
-    registerDate: req.body.registerDate,
-    company: req.body.company,
-  });
-
-  newItem.save().then((item) => res.redirect('/'));
-});
-
-app.post('/company/add', (req, res) => {
-  const newCompany = new RegisterCompany({
-    company: req.body.company,
-    ceo: req.body.ceo,
-    companyPhone: req.body.companyPhone,
-  });
-
-  newCompany.save().then((company) => res.redirect('/'));
-});
-
-app.post('/buyer/add', (req, res) => {
-  const newBuyer = new Buyer({
-    buyerName: req.body.buyerName,
-    phoneNumber: req.body.phoneNumber,
-  });
-
-  newBuyer.save().then((buyer) => res.redirect('/'));
-});
-
-app.post('/purchase/add', (req, res) => {
-  const newPurchaseInfo = new PurchaseInfo({
-    purchaseNumber: req.body.purchaseNumber,
-    itemInfo: req.body.itemInfo,
-    buyer: req.body.buyer,
-    price: req.body.price,
-    purchaseDate: req.body.purchaseDate,
-  });
-
-  newPurchaseInfo.save().then((purchaseInfo) => res.redirect('/'));
-});
-
-const port = 3000;
-app.listen(port, () => console.log('Server running...'));
+module.exports = app;

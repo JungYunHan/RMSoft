@@ -1,18 +1,17 @@
 {
-  "name": "rm-mart",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "name": "mongodb",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node ./bin/www"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.18.3",
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
-    "mongoose": "^5.2.7"
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "mongoose": "^6.7.3",
+    "morgan": "~1.9.1"
   }
 }

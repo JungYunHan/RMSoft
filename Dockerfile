@@ -1,15 +1,21 @@
-# node 이미지 사용
-FROM node:12
+# ./Dockerfile
 
-# 패키지 우선 복사
-COPY ./package* /usr/src/app/ 
-WORKDIR /usr/src/app
-RUN npm install
+FROM ubuntu:18.04
 
-# 소스 복사
-COPY . /usr/src/app
+RUN apt update
+RUN apt install wget -y
+RUN apt install curl -y
+RUN cd ~
+RUN curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh
+RUN bash nodesource_setup.sh
+RUN apt install nodejs -y
+RUN apt-get install build-essential -y
+RUN npm install express -g
+RUN npm install express-generator -g
+RUN npm install pm2 -g
+RUN express /root/expressapp
+WORKDIR /root/expressapp/
+COPY . /root/expressapp/
 
-# mongo 서버 실행
-EXPOSE 3000
-CMD node app.js
-
+# npm i는 npm install과 같음
+RUN npm i
